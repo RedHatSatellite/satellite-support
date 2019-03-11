@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Exit on any error
+set -e
+
+testlocation(){
+  mkdir $TESTDIRECTORY
+  echo ""
+  echo "Starting IO tests via the 'fio' command. This may take up to an hour or more"
+  echo "depending on the size of the files being tested. Be patient!"
+  echo ""
+  echo "************* Running READ test via fio:"
+  echo ""
+  fio --name=read-test --rw=read --size="$FILEGB"G --directory=$TESTDIRECTORY
+  echo ""
+  echo "************* Removing test files."
+  rm -f "$TESTDIRECTORY"/*
+  echo ""
+  echo "************* Running WRITE test via fio:"
+  fio --name=write-test --rw=write --size="$FILEGB"G --directory=$TESTDIRECTORY
+  echo ""
+  echo "************* Removing test files."
+  rm -f "$TESTDIRECTORY"/*
+  echo ""
+  echo "************* Running READ/WRITE test via fio:"
+  fio --name=randrw-test --rw=write --size="$FILEGB"G --directory=$TESTDIRECTORY --rwmixread=80
+  echo ""
+  echo "************* Removing test files."
+  rm -f "$TESTDIRECTORY"/*
+  echo ""
+  echo "Test complete! There is still a directory located : $TESTDIRECTORY that you"
+  echo "will need to remove to run this test again."
+}
+
+usage(){
+  echo "Please specify a path to test file IO against:"
+  echo ""
+  echo "  # ./storage-benchmark /var/lib/pulp/"
+  echo ""
+}
+
+TESTPATH=$1
+
+if [ -z $TESTPATH ]
+then
+  usage
+  exit 1
+fi
+
+RAMGB=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}'`
+#FILEGB="$(($RAMGB * 2))"
+FILEGB=1
+TESTDIRECTORY=$TESTPATH/storage-benchmark
+
+echo "This test creates a test file that is double (2X) the size of this system's"
+echo "RAM in GB. This benchmark will create a test file of size: "
+echo ""
+echo  -e "\033[33;5;7m$FILEGB Gigabytes\033[0m"
+echo ""
+echo "in the: [$TESTDIRECTORY] location. This is to ensure that the test utilizes"
+echo "a combination of cached and non-cached data during the test."
+echo ""
+echo "**** WARNING! Please verify you have enough free space to create a $FILEGB GB"
+echo "file in this location before proceeding. "
+echo ""
+read -p "Do you wish to proceed? (Y/N) "
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    echo "** cancelled **"
+    exit 1
+fi
+
+echo ""
+
+testlocation
