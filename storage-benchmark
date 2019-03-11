@@ -48,8 +48,7 @@ then
 fi
 
 RAMGB=`sudo dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}'`
-#FILEGB="$(($RAMGB * 2))"
-FILEGB=1
+FILEGB="$(($RAMGB * 2))"
 TESTDIRECTORY=$TESTPATH/storage-benchmark
 
 echo "This test creates a test file that is double (2X) the size of this system's"
