@@ -52,35 +52,47 @@ FILEGB="$(($RAMGB * 2))"
 TESTDIRECTORY=$TESTPATH/storage-benchmark
 
 echo "This test creates a test file that is double (2X) the size of this system's"
-echo "RAM in GB. This benchmark will create a test file of size: "
+echo "RAM in GB. This benchmark will create a test file of size.. "
 echo ""
 echo  -e "\033[33;5;7m$FILEGB Gigabytes\033[0m"
 echo ""
-echo "in the: [$TESTDIRECTORY] location. This is to ensure that the test utilizes"
+echo ".. in the: [$TESTDIRECTORY] location. This is to ensure that the test utilizes"
 echo "a combination of cached and non-cached data during the test."
 echo ""
 echo "**** WARNING! Please verify you have enough free space to create a $FILEGB GB"
 echo "file in this location before proceeding. "
 echo ""
-echo "**** WARNING! This test will stop all Satellite 6 services to ensure no "
-echo "interruption to critical processes."
-echo ""
-read -p "Do you wish to proceed? (Y/N) "
-if [[ ! $REPLY =~ ^[Yy]$ ]]
+echo "Do you wish to proceed? (Y/N) "
+read PROCEED
+if [[ ! $PROCEED =~ ^[Yy]$ ]]
 then
     echo "** cancelled **"
     exit 1
 fi
 
 echo ""
-echo "Stopping services."
+echo "**** WARNING! We recommend you stop all Satellite 6 services to ensure no "
+echo "interruption to critical processes."
 echo ""
-foreman-maintain service stop
 
+echo "Do you wish to proceed? (Y/N) "
+read STOPSERVICES
+if [[ $STOPSERVICES =~ ^[Yy]$ ]]
+then
+    echo ""
+    echo "Stopping services."
+    echo ""
+    foreman-maintain service stop
+fi
 
 testlocation
 
-echo ""
-echo "Starting services."
-echo ""
-foreman-maintain service start
+if [[ $STOPSERVICES =~ ^[Yy]$ ]]
+then
+    echo ""
+    echo "Starting services."
+    echo ""
+    foreman-maintain service start
+fi
+
+echo "Finished."
