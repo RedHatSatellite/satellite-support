@@ -1,5 +1,31 @@
 #!/bin/bash
 
+###############################################################################
+############################## README #########################################
+#
+# This script will execute a series of fio based IO tests against a targeted
+# directory specified in its execution. This test will create a very large
+# file that is double (2x) the size of the physical RAM on this system to
+# ensure that we are not just testing the caching at the OS level of the
+# storage.
+#
+# NOTE: We recommend you stop all services before executing this script and
+# will be prompoted to do so.
+#
+# RESULTS: This test is meant to provide guidance and is not a hard-and-fast
+# indicator of how your Satellite will perform. For more information please
+# see this KCS here:
+#
+# https://access.redhat.com/solutions/3397771
+#
+# Generally you wish to see on average 100MB/sec or higher in the tests below.
+#  - Local SSD based storage should values of 600MB/sec or higher
+#  - Spinning disks should see values in the range of 100-200MB/sec or higher
+#  - If you see values below this, please open a support ticket for assistance.
+#
+###############################################################################
+
+
 # Exit on any error
 set -e
 
