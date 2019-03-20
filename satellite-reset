@@ -1,0 +1,260 @@
+#!/bin/bash
+
+emessage(){
+  #echo ""
+  GREEN='\033[0;32m'
+  NC='\033[0m' # No Color
+  echo -e " ${GREEN}*** $1${NC}"
+}
+
+### 1. Truncate task tables
+truncatetasks(){
+
+  emessage "DELETING All task data"
+
+  TABLE_COUNTS="select count(*) as foreman_tasks_tasks from foreman_tasks_tasks;
+  select count(*) as dynflow_execution_plans from dynflow_execution_plans;
+  select count(*) as dynflow_actions from dynflow_actions;
+  select count(*) as dynflow_steps from dynflow_steps;"
+
+
+  emessage "Table counts before:"
+  echo $TABLE_COUNTS | sudo -i -u postgres psql -d foreman
+
+  emessage "Deleting foreman_tasks_tasks"
+  FT="TRUNCATE TABLE dynflow_envelopes,dynflow_delayed_plans,dynflow_steps,dynflow_actions,dynflow_execution_plans,foreman_tasks_locks,foreman_tasks_tasks;"
+
+  sudo -i -u postgres psql -d foreman -c "$FT"
+
+  emessage "Done."
+
+  emessage "Table counts after:"
+  echo $TABLE_COUNTS | sudo -i -u postgres psql -d foreman
+
+  emessage "Restarting services."
+  katello-service restart 2>&1  > /dev/null
+
+  emessage "Foreman Task and Dynflow table truncate: Complete"
+
+}
+
+### 2. Cancel all pulp tasks
+cancelpulptasks(){
+  emessage "Install pulp-admin"
+  pulpversion=$(rpm -qa pulp-server --queryformat "%{VERSION}")
+  yum -y install pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch
+
+  sed -i.bak "20,30s/^# host:.*/host: $(hostname -f)/g" /etc/pulp/admin/admin.conf
+  mkdir -p ~/.pulp
+  chmod 0700 ~/.pulp
+  sudo cat /etc/pki/katello/certs/pulp-client.crt /etc/pki/katello/private/pulp-client.key > ~/.pulp/user-cert.pem
+
+  NUMTASKS=`mongo pulp_database --eval 'printjson(db.task_status.find({"state": {"$in": ["waiting", "running"]}}).toArray())' | grep task_id | awk '{print $NF}' | sed s#\"##g | sed s#,##g | wc -l`
+  emessage "Cancelling [$NUMTASKS] Pulp Tasks"
+  mongo pulp_database --eval 'printjson(db.task_status.find({"state": {"$in": ["waiting", "running"]}}).toArray())' | grep task_id | awk '{print $NF}' | sed s#\"##g | sed s#,##g | xargs -n1 pulp-admin tasks  cancel --task-id
+
+  emessage "Pulp Task Cancel: Complete"
+}
+
+
+### 3. Clear hornetq directories
+resethornetq(){
+  emessage "Stopping services."
+  katello-service stop
+
+  emessage "Removing old journal files."
+  sudo rm -rf /var/lib/candlepin/hornetq/*
+  systemctl start qpidd
+
+  emessage "Sleeping for 60 seconds for qpid to start fully"
+  sleep 60
+
+  emessage "Recreating queues."
+  # Forcefully delete the Qpid queue
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 del queue katello_event_queue --force
+
+  # Re-create the Qpid queue
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
+
+  # Re-create the exchanges
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue compliance.created
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue entitlement.created
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue entitlement.deleted
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.created
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.deleted
+
+  emessage "Starting services."
+  katello-service start 2>&1  > /dev/null
+
+  emessage "HornetQ journal reset: Complete"
+
+}
+
+### 4. Clear and recreate Pulp QPID queues (but not the agent queues)
+resetjournals(){
+  emessage "Clearing old qpid journal files.."
+
+  katello-service stop
+  service postgresql start
+  rm -rf /var/lib/qpidd/.qpidd /var/lib/qpidd/*
+  systemctl start qpidd
+  emessage "Sleeping for 60 seconds for qpid to start fully"
+  sleep 60
+
+  emessage "Recreating infrastructure queues.."
+
+  qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 add exchange topic event --durable
+  qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 add queue katello_event_queue --durable
+  for key in compliance.created entitlement.created entitlement.deleted pool.created pool.deleted; do
+      qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 bind event katello_event_queue $key
+  done
+
+  emessage "Restarting services.."
+
+  katello-service restart 2>&1  > /dev/null
+
+  emessage "QPID Journal reset: Complete. You have removed all gofer based client queues"
+  emessage "as well as all the disk space consumed in /var/lib/qpid. If you wish to "
+  emessage "re-create these queues please re-run: satellite-reset with -g:"
+  emessage " # satellite-reset -g"
+  emessage "See https://access.redhat.com/articles/3875321 for more information."
+}
+
+### 5. Recreate pulp.agent qpid queues
+recreategoferqueues(){
+  emessage "Recreating gofer queues (pulp.agent).."
+
+  katello-service stop
+  service postgresql start
+  systemctl start qpidd
+  emessage "Sleeping for 60 seconds for qpid to start fully"
+  sleep 60
+
+  for i in pulp_resource_manager pulp_workers pulp_celerybeat; do service $i restart; done
+
+  emessage "Creating client queues, this can take some time (multiple hours or more).."
+
+  for consumer in $(su - postgres -c "psql candlepin -c \"select uuid from cp_consumer;\"" | grep "^ " | grep -v uuid); do
+    echo "Creating queue for: $consumer"
+    qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 add queue pulp.agent.${consumer} --durable;
+  done
+
+  emessage "Restarting services.."
+
+  katello-service restart 2>&1  > /dev/null
+
+  emessage "Gofer queue Recreation: Complete"
+}
+
+
+usage(){
+  cat << EOF
+
+  !!!!!!!!! WARNING: This utility should only be used as directed by Red Hat Support.
+  There is a risk for dataloss during these cleanup routines and should only be
+  used when directly instructed to do so !!!!!!!!!
+
+  Usage:
+      satellite-reset [OPTIONS]
+
+  Options:
+      -h --help                    show help
+      -p --pulptasks               Cancel all running and pending Pulp tasks
+                                    - Deletes all running and pending Pulp tasks
+      -t --tasks                   Truncate all Foreman Task and Dynflow Tables
+                                    - Deletes ALL current and historical task data
+      -q --hornetq                 Reset HornetQ journals and queues
+                                    - See: https://access.redhat.com/solutions/3380351
+      -j --journals                Delete and recreate all QPID Journal Files
+                                    - See: https://access.redhat.com/solutions/3157651
+                                    - Also see: https://access.redhat.com/articles/3875321
+      -g --gofer                   Re-create gofer client queues (pulp.agent)
+                                    - See: https://access.redhat.com/articles/3875321
+
+EOF
+}
+
+getopt --test > /dev/null
+if [[ $? -ne 4 ]]; then
+    echo "I’m sorry, `getopt --test` failed in this environment."
+    exit 1
+fi
+
+OPTIONS=hptjqg
+LONGOPTIONS=hornetq,pulptasks,tasks,journals,help,gofer
+
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $# == 0 ]]; then
+    # e.g. $? == 1
+    #  then getopt has complained about wrong arguments to stdout
+    usage
+    exit 2
+fi
+# read getopt’s output this way to handle the quoting right:
+eval set -- "$PARSED"
+
+while true; do
+    case "$1" in
+        -q|--hornetq)
+            q=y
+            shift
+            ;;
+        -p|--pulptasks)
+            p=y
+            shift
+            ;;
+        -h|--help)
+            h=y
+            shift
+            ;;
+        -t|--tasks)
+            t=y
+            shift
+            ;;
+        -j|--journals)
+            j=y
+            shift
+            ;;
+        -g|--gofer)
+            g=y
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Programming error"
+            exit 3
+            ;;
+    esac
+done
+
+if [ "$h" == "y" ]; then
+  usage
+fi
+
+if [ "$q" == "y" ]; then
+  echo "Resetting HornetQ journals"
+  resethornetq
+fi
+
+if [ "$p" == "y" ]; then
+  echo "Resetting Pulp Tasks"
+  cancelpulptasks
+fi
+
+if [ "$t" == "y" ]; then
+  echo "Resetting Tasks tables"
+  truncatetasks
+fi
+
+if [ "$j" == "y" ]; then
+  echo "Resetting QPID Journal Files"
+  resetjournals
+fi
+
+if [ "$g" == "y" ]; then
+  echo "Recreating gofer queues (pulp.agent)"
+  recreategoferqueues
+fi
