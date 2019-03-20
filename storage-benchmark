@@ -30,7 +30,7 @@
 set -e
 
 testlocation(){
-  mkdir $TESTDIRECTORY
+  mkdir -p $TESTDIRECTORY
   echo ""
   echo "Starting IO tests via the 'fio' command. This may take up to an hour or more"
   echo "depending on the size of the files being tested. Be patient!"
