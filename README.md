@@ -1,9 +1,6 @@
 # satellite-support
 Tools for use in supporting the operation of Satellite 6
 
-# satellite-support
-Tools for use in supporting the operation of Satellite 6
-
 ## satellite-reset
 
 **WARNING:** This utility should only be used as directed by Red Hat Support.
