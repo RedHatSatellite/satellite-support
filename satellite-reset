@@ -32,7 +32,7 @@ truncatetasks(){
   echo $TABLE_COUNTS | sudo -i -u postgres psql -d foreman
 
   emessage "Restarting services."
-  katello-service restart 2>&1  > /dev/null
+  foreman-maintain service restart 2>&1  > /dev/null
 
   emessage "Foreman Task and Dynflow table truncate: Complete"
 
@@ -60,7 +60,7 @@ cancelpulptasks(){
 ### 3. Clear hornetq directories
 resethornetq(){
   emessage "Stopping services."
-  katello-service stop
+  foreman-maintain service stop
 
   emessage "Removing old journal files."
   sudo rm -rf /var/lib/candlepin/hornetq/*
@@ -84,7 +84,7 @@ resethornetq(){
   qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.deleted
 
   emessage "Starting services."
-  katello-service start 2>&1  > /dev/null
+  foreman-maintain service start 2>&1  > /dev/null
 
   emessage "HornetQ journal reset: Complete"
 
@@ -94,7 +94,7 @@ resethornetq(){
 resetjournals(){
   emessage "Clearing old qpid journal files.."
 
-  katello-service stop
+  foreman-maintain service stop
   service postgresql start
   rm -rf /var/lib/qpidd/.qpidd /var/lib/qpidd/*
   systemctl start qpidd
@@ -111,7 +111,7 @@ resetjournals(){
 
   emessage "Restarting services.."
 
-  katello-service restart 2>&1  > /dev/null
+  foreman-maintain service restart 2>&1  > /dev/null
 
   emessage "QPID Journal reset: Complete. You have removed all gofer based client queues"
   emessage "as well as all the disk space consumed in /var/lib/qpid. If you wish to "
@@ -124,10 +124,23 @@ resetjournals(){
 recreategoferqueues(){
   emessage "Recreating gofer queues (pulp.agent).."
 
-  katello-service stop
+  foreman-maintain service stop
   service postgresql start
   systemctl start qpidd
-  emessage "Sleeping for 60 seconds for qpid to start fully"
+  emessage "Please verify that you have high enough kernel.sem and fs.aio-max-nr settings"
+  emessage "to support a large number of agent queues: "
+  emessage ""
+  emessage "# sysctl kernel.sem fs.aio-max-nr"
+  emessage "kernel.sem = 250	256000	32	16384"
+  emessage "fs.aio-max-nr = 1000000"
+  emessage ""
+  emessage "These values are required if you have more than 2000 katello-agents. To set these"
+  emessage "simply run:"
+  emessage " echo \"kernel.sem= 250 256000 32 16384\" > /etc/sysctl.d/01-satellite-tune.conf"
+  emessage " echo \"fs.aio-max-nr = 1000000\" >> /etc/sysctl.d/01-satellite-tune.conf"
+  emessage " sysctl -p /etc/sysctl.d/01-satellite-tune.conf && systemctl restart qpidd"
+  emessage ""
+  emessage "Sleeping for 60 seconds for qpid to start fully. If you need to adjust kernel params, CTRL+C"
   sleep 60
 
   for i in pulp_resource_manager pulp_workers pulp_celerybeat; do service $i restart; done
@@ -141,7 +154,7 @@ recreategoferqueues(){
 
   emessage "Restarting services.."
 
-  katello-service restart 2>&1  > /dev/null
+  foreman-maintain service restart 2>&1  > /dev/null
 
   emessage "Gofer queue Recreation: Complete"
 }
@@ -232,6 +245,18 @@ done
 
 if [ "$h" == "y" ]; then
   usage
+fi
+
+# Check for foreman-maintain
+
+if [ ! -x /usr/bin/foreman-maintain ]
+then
+  echo ""
+  echo "ERROR: This script requires the 'foreman-maintain' command be installed. It"
+  echo "is available in the [rhel-7-server-satellite-maintenance-6-rpms] repository via"
+  echo "the [rubygem-foreman_maintain] package." 
+  echo ""
+  exit 3
 fi
 
 if [ "$q" == "y" ]; then
