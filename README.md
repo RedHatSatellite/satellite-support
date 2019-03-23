@@ -13,3 +13,6 @@ Utility used for checking the disk IO of your Satellite 6 server. See:
 
 [https://access.redhat.com/solutions/3397771](https://access.redhat.com/solutions/3397771)
 
+## postgres-size-report
+
+Lists the top table sizes in disk space for both Candlepin and Foreman
