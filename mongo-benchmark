@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo "Running [READ] test of MongoDB for 4 minutes."
+
+echo "{nThreads:32,fileSizeMB:1000,r:true}" > /tmp/mongo-read-test.json
+
+timeout 240 mongoperf < /tmp/mongo-read-test.json > mongoperf-read.out
+
+echo "Running [WRITE] test of MongoDB for 4 minutes."
+
+echo "{nThreads:32,fileSizeMB:1000,w:true}" > /tmp/mongo-write-test.json
+
+timeout 240 mongoperf < /tmp/mongo-write-test.json > mongoperf-write.out
+
+rm /tmp/mongo-read-test.json
+rm /tmp/mongo-write-test.json
+
+echo "Test Complete, results in: ./mongoperf-read.out and ./mongoperf-write.out"
+echo ""
+
