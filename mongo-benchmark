@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo ""
+echo "This test creates a 1GB file in your CWD, it will be removed at the completion of the test."
+echo ""
 echo "Running [READ] test of MongoDB for 4 minutes."
 
 echo "{nThreads:32,fileSizeMB:1000,r:true}" > /tmp/mongo-read-test.json
@@ -14,7 +17,10 @@ timeout 240 mongoperf < /tmp/mongo-write-test.json > mongoperf-write.out
 
 rm /tmp/mongo-read-test.json
 rm /tmp/mongo-write-test.json
-
+rm mongoperf__testfile__tmp
 echo "Test Complete, results in: ./mongoperf-read.out and ./mongoperf-write.out"
+echo ""
+echo "For comparison and background on mongoperf, see: "
+echo " * https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf"
 echo ""
 
