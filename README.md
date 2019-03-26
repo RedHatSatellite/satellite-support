@@ -16,3 +16,8 @@ Utility used for checking the disk IO of your Satellite 6 server. See:
 ## postgres-size-report
 
 Lists the top table sizes in disk space for both Candlepin and Foreman
+
+## mongo-benchmark
+
+Utility used for checking IO speed specific to MongoDB. See:
+[https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf](https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf)
