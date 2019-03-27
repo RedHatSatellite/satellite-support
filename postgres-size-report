@@ -35,18 +35,18 @@ echo $TABLEQUERY | sudo -u postgres psql -d candlepin | tee -a $LOG
 echo ""
 echo "************** Foreman Tablesizes **************"
 echo ""
-echo $TABLEQUERY | sudo -u postgres psql -d foreman 	| tee -a $LOG
+echo $TABLEQUERY | sudo -u postgres psql -d foreman | tee -a $LOG
 
 
 echo ""
 echo "*************** FileSystem Usage ***************"
 echo ""
 
-echo "du -hs /var/lib/pgsql/*"												| tee -a $LOG
-du -hs /var/lib/pgsql/*																| tee -a $LOG
-echo 																									| tee -a $LOG
-echo "du -hs /var/lib/pgsql/data/*"										| tee -a $LOG
-du -hs /var/lib/pgsql/data/* 													| tee -a $LOG
+echo "du -hs /var/lib/pgsql/*"					| tee -a $LOG
+du -hs /var/lib/pgsql/*									| tee -a $LOG
+echo 																		| tee -a $LOG
+echo "du -hs /var/lib/pgsql/data/*"			| tee -a $LOG
+du -hs /var/lib/pgsql/data/* 						| tee -a $LOG
 
 echo
 echo
