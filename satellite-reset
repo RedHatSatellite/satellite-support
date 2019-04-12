@@ -60,7 +60,7 @@ cancelpulptasks(){
   do
     rpm -q --quiet ${myrpm}  
     if [ $? -eq 1 ]; then 
-      emessage "Installing ${myrpm}"
+      emessage "RPM ${myrpm} is missing! Installing..."
       yum -y install ${myrpm}
     else
       emessage "RPM ${myrpm} already installed"
