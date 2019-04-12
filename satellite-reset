@@ -42,7 +42,14 @@ truncatetasks(){
 cancelpulptasks(){
   emessage "Install pulp-admin"
   pulpversion=$(rpm -qa pulp-server --queryformat "%{VERSION}")
-  yum -y install pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch
+  # 6.3:
+  # allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch"
+  # 6.4:
+  allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch"
+  for myrpm in ${allrpms}
+  do
+    rpm -q --quiet ${myrpm}||yum -y install ${myrpm}
+  done
 
   sed -i.bak "20,30s/^# host:.*/host: $(hostname -f)/g" /etc/pulp/admin/admin.conf
   mkdir -p ~/.pulp
