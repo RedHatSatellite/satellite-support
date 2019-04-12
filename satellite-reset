@@ -42,10 +42,18 @@ truncatetasks(){
 cancelpulptasks(){
   emessage "Install pulp-admin"
   pulpversion=$(rpm -qa pulp-server --queryformat "%{VERSION}")
-  # 6.3:
-  # allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch"
-  # 6.4:
-  allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch"
+  satversion=$(rpm -q satellite --queryformat "%{VERSION}")
+  case ${satversion} in
+    6.3.*)
+      allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch"
+      ;;
+    6.4.*)
+      allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch"
+      ;;
+    *)
+      allrpms="pulp-admin-client-${pulpversion}"
+      ;;
+   esac
   for myrpm in ${allrpms}
   do
     rpm -q --quiet ${myrpm}||yum -y install ${myrpm}
