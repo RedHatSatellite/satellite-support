@@ -40,9 +40,32 @@ truncatetasks(){
 
 ### 2. Cancel all pulp tasks
 cancelpulptasks(){
-  emessage "Install pulp-admin"
+
   pulpversion=$(rpm -qa pulp-server --queryformat "%{VERSION}")
-  yum -y install pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch
+  satversion=$(rpm -q satellite --queryformat "%{VERSION}")
+
+  case ${satversion} in
+    6.3.*)
+      allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch pulp-rpm-handlers.noarch"
+      ;;
+    6.4.*)
+      allrpms="pulp-admin-client-${pulpversion} pulp-rpm-admin-extensions.noarch"
+      ;;
+    *)
+      allrpms="pulp-admin-client-${pulpversion}"
+      ;;
+   esac
+  #
+  for myrpm in ${allrpms}
+  do
+    rpm -q --quiet ${myrpm}  
+    if [ $? -eq 1 ]; then 
+      emessage "RPM ${myrpm} is missing! Installing..."
+      yum -y install ${myrpm}
+    else
+      emessage "RPM ${myrpm} already installed"
+    fi
+  done
 
   sed -i.bak "20,30s/^# host:.*/host: $(hostname -f)/g" /etc/pulp/admin/admin.conf
   mkdir -p ~/.pulp
@@ -50,9 +73,12 @@ cancelpulptasks(){
   sudo cat /etc/pki/katello/certs/pulp-client.crt /etc/pki/katello/private/pulp-client.key > ~/.pulp/user-cert.pem
 
   NUMTASKS=`mongo pulp_database --eval 'printjson(db.task_status.find({"state": {"$in": ["waiting", "running"]}}).toArray())' | grep task_id | awk '{print $NF}' | sed s#\"##g | sed s#,##g | wc -l`
-  emessage "Cancelling [$NUMTASKS] Pulp Tasks"
-  mongo pulp_database --eval 'printjson(db.task_status.find({"state": {"$in": ["waiting", "running"]}}).toArray())' | grep task_id | awk '{print $NF}' | sed s#\"##g | sed s#,##g | xargs -n1 pulp-admin tasks  cancel --task-id
-
+  if [ $NUMTASKS -eq 0 ]; then
+    emessage "No tasks to cancel ( $NUMTASKS Pulp Tasks Found!)"
+  else
+    emessage "Cancelling [$NUMTASKS] Pulp Tasks"
+    mongo pulp_database --eval 'printjson(db.task_status.find({"state": {"$in": ["waiting", "running"]}}).toArray())' | grep task_id | awk '{print $NF}' | sed s#\"##g | sed s#,##g | xargs -n1 pulp-admin tasks  cancel --task-id
+  fi
   emessage "Pulp Task Cancel: Complete"
 }
 
