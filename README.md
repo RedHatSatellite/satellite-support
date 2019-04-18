@@ -21,3 +21,6 @@ Lists the top table sizes in disk space for both Candlepin and Foreman
 
 Utility used for checking IO speed specific to MongoDB. See:
 [https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf](https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf)
+
+## check-perf-tuning
+Utility to check performance tuning parameters on your Satellite 6 server.
