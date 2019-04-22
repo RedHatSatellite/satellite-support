@@ -1,0 +1,166 @@
+#!/bin/bash
+# Run this script on your Satellite server to review the performance tuning
+# specific configuration parameters
+# How to read the output:
+# Sample output:
+# ************************ PULP *******************  <--Tuning component
+# Configuration : /etc/default/pulp_workers          <--Config file path
+# Custom-hiera  : katello::max_tasks_per_pulp_worker <--Custom-hiera entry
+#                 katello::num_pulp_workers
+#Current values:                                     <--Current values in config
+#PULP_CONCURRENCY=2
+
+check_return_value () {
+  if [ $? -ne 0 ]; then
+     echo "                **$1 Configuration not set**"
+  fi
+}
+
+echo "************************ APACHE & PASSENGER *****************************"
+echo "Configuration : /etc/httpd/conf.modules.d/prefork.conf"
+echo "Custom-hiera  : apache::mod::prefork::serverlimit"
+echo "                apache::mod::prefork::startservers"
+echo "Current values:"
+cat /etc/httpd/conf.modules.d/prefork.conf | grep 'ServerLimit\|StartServers'
+echo ""
+
+echo "Configuration : /etc/httpd/conf.d/05-foreman.conf"
+echo "Custom-hiera  : foreman::keepalive"
+echo "                foreman::max_keepalive_requests"
+echo "                foreman::keepalive_timeout"
+echo "                foreman::passenger_min_instances"
+echo "Current values:"
+cat /etc/httpd/conf.d/05-foreman.conf | grep 'KeepAlive\b\|MaxKeepAliveRequests\|KeepAliveTimeout\|PassengerMinInstances'
+echo ""
+
+echo "Configuration : /etc/httpd/conf.d/05-foreman-ssl.conf"
+echo "Custom-hiera  : foreman::keepalive"
+echo "                foreman::max_keepalive_requests"
+echo "                foreman::keepalive_timeout"
+echo "                foreman::passenger_min_instances"
+echo "Current values:"
+cat /etc/httpd/conf.d/05-foreman-ssl.conf | grep 'KeepAlive\b\|MaxKeepAliveRequests\|KeepAliveTimeout\|PassengerMinInstances'
+echo ""
+
+echo "Configuration : /etc/httpd/conf.d/05-foreman-ssl.d/katello.conf"
+echo "Custom-hiera  : **This configuration is not in custom-hiera yet (BZ 1602814)**"
+echo "Current values:"
+cat /etc/httpd/conf.d/05-foreman-ssl.d/katello.conf | grep 'KeepAlive\b\|MaxKeepAliveRequests\|KeepAliveTimeout'
+echo ""
+
+if [ -f /etc/httpd/conf.d/passenger.conf ]; then
+  # Satellite 6.3 and lesser
+  echo "Configuration : /etc/httpd/conf.d/passenger.conf"
+  echo "Custom-hiera  : apache::mod::passenger::passenger_max_pool_size"
+  echo "                apache::mod::passenger::passenger_max_request_queue_size"
+  echo "Current values:"
+  cat /etc/httpd/conf.d/05-foreman-ssl.conf | grep 'MaxPoolSize\|PassengerMaxRequestQueueSize'
+  echo ""
+else
+  # Satellite 6.4+
+  echo "Configuration : /etc/httpd/conf.modules.d/passenger_extra.conf"
+  echo "Custom-hiera  : apache::mod::passenger::passenger_max_pool_size"
+  echo "                apache::mod::passenger::passenger_max_request_queue_size"
+  echo "Current values:"
+  cat /etc/httpd/conf.modules.d/passenger_extra.conf | grep 'MaxPoolSize\|PassengerMaxRequestQueueSize'
+  echo ""
+fi
+
+echo "************************ PULP *******************************************"
+echo "Configuration : /etc/default/pulp_workers"
+echo "Custom-hiera  : katello::max_tasks_per_pulp_worker"
+echo "                katello::num_pulp_workers"
+echo "Current values:"
+cat /etc/default/pulp_workers | grep '^PULP_MAX_TASKS_PER_CHILD\|^PULP_CONCURRENCY'
+echo ""
+
+echo "************************* FOREMAN TASKS**********************************"
+if [ -f /etc/sysconfig/foreman-tasks ]; then
+  # Satellite 6.3 and lesser
+  echo "Configuration :  /etc/sysconfig/foreman-tasks"
+  echo "Custom-hiera  : **This configuration is not in custom-hiera yet (BZ 1601034)**"
+  echo "Current values:"
+  cat /etc/sysconfig/foreman-tasks | grep 'EXECUTOR_MEMORY_LIMIT\|EXECUTOR_MEMORY_MONITOR_DELAY\|EXECUTOR_MEMORY_MONITOR_INTERVAL'
+  echo ""
+else
+  # Satellite 6.4+
+  echo "Configuration : /etc/sysconfig/dynflowd"
+  echo "Custom-hiera  : **This configuration is not in custom-hiera yet (BZ 1601034)**"
+  echo "Current values:"
+  cat /etc/sysconfig/dynflowd | grep 'EXECUTOR_MEMORY_LIMIT\|EXECUTOR_MEMORY_MONITOR_DELAY\|EXECUTOR_MEMORY_MONITOR_INTERVAL'
+  echo ""
+fi
+
+echo "************************* POSTGRES **************************************"
+echo "Configuration : /var/lib/pgsql/data/postgresql.conf"
+echo "Custom-hiera  : postgresql::server::config_entries:"
+echo "                   max_connections:"
+echo "                   shared_buffers:"
+echo "                   work_mem:"
+echo "                   checkpoint_segments:"
+echo "                   checkpoint_completion_target:"
+echo "Current values:"
+cat /var/lib/pgsql/data/postgresql.conf | \
+    grep 'max_connections\|shared_buffers\|work_mem\|checkpoint_segments\|checkpoint_completion_target' | \
+        grep -v '^#'
+echo ""
+
+echo "************************* QPID ******************************************"
+echo "Configuration : /etc/qpid/qpidd.conf"
+echo "Custom-hiera  : qpid::mgmt_pub_interval"
+echo "Current values:"
+cat /etc/qpid/qpidd.conf | grep 'mgmt_pub_interval'
+check_return_value 'mgmt_pub_interval'
+echo ""
+
+echo "************************* LIMITS ****************************************"
+echo "Configuration : /etc/systemd/system/httpd.service.d/limits.conf"
+echo "Custom-hiera  : **This configuration is not in custom-hiera yet (BZ 1588193)**"
+echo "Current values:"
+if [ -f /etc/systemd/system/httpd.service.d/limits.conf ]; then
+   cat /etc/systemd/system/httpd.service.d/limits.conf | grep 'LimitNOFILE'
+   check_return_value 'LimitNOFILE'
+else
+   echo "                **Configuration not found**"
+fi
+echo ""
+
+echo "Configuration : /etc/systemd/system/qdrouterd.service.d/90-limits.conf"
+echo "Custom-hiera  : qpid::router::open_file_limit"
+echo "Current values:"
+if [ -f /etc/systemd/system/qdrouterd.service.d/90-limits.conf ]; then
+   cat /etc/systemd/system/qdrouterd.service.d/90-limits.conf | grep 'LimitNOFILE'
+   check_return_value 'LimitNOFILE'
+else
+   echo "                **Configuration not found**"
+fi
+echo ""
+
+echo "Configuration : /etc/systemd/system/qpidd.service.d/90-limits.conf"
+echo "Custom-hiera  : qpid::open_file_limit"
+echo "Current values:"
+if [ -f /etc/systemd/system/qpidd.service.d/90-limits.conf ]; then
+   cat /etc/systemd/system/qpidd.service.d/90-limits.conf | grep 'LimitNOFILE'
+   check_return_value 'LimitNOFILE'
+else
+   echo "                **Configuration not found**"
+fi
+echo ""
+
+echo "Configuration : /etc/systemd/system/smart_proxy_dynflow_core.service.d/90-limits.conf"
+echo "Custom-hiera  : foreman_proxy::plugin::dynflow::open_file_limit"
+echo "Current values:"
+if [ -f /etc/systemd/system/smart_proxy_dynflow_core.service.d/90-limits.conf ]; then
+   cat /etc/systemd/system/smart_proxy_dynflow_core.service.d/90-limits.conf | grep 'LimitNOFILE'
+   check_return_value 'LimitNOFILE'
+else
+   echo "                **Configuration not found**"
+fi
+echo ""
+
+echo "*************************** MISC ****************************************"
+echo "Configuration :  /etc/sysctl.conf"
+echo "Custom-hiera  : **This configuration is not in custom-hiera yet (BZ 1588659)**"
+echo "Current values:"
+cat /etc/sysctl.conf | grep 'fs.aio-max-nr'
+check_return_value 'fs.aio-max-nr'
