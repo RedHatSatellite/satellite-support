@@ -1,0 +1,29 @@
+Get the hypervisors that are duplicate first
+
+# foreman-rake console
+> $stdout = File.new('/tmp/dup_hosts', 'w')
+> Host.joins(:subscription_facet).joins("left outer join katello_content_facets on hosts.id = katello_content_facets.host_id").where("katello_content_facets.id is NULL").pluck('hosts.id')
+> exit
+
+Now run the following script:
+
+#!/bin/bash
+
+# script to delete dup hypervisors
+
+# check to make sure hammer password file is present
+file=/root/.hammer/cli_config.yml
+
+if ! [ -e "$file" ]; then
+    echo "file does not exist, please visit this kbase to learn how to setup passwordless hammer. https://access.redhat.com/solutions/1612123"
+    exit
+fi
+
+# deleting the hosts
+dups=$(cat /tmp/dup_hosts)
+for b in $(echo $dups | sed -e 's/,//g' -e 's/\[//g' -e 's/\]//g');
+do
+   echo "Deleting host $b"
+   hammer host delete --id $b
+done
+
