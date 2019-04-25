@@ -24,3 +24,6 @@ Utility used for checking IO speed specific to MongoDB. See:
 
 ## check-perf-tuning
 Utility to check performance tuning parameters on your Satellite 6 server.
+
+## cv_sync_metrics
+This rake task creates a report on the performance of different Content view Capsule sync tasks in your Satellite6 environment.  For usage instructions, read the [docs](docs/cv_sync_metrics.md).
