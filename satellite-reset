@@ -95,8 +95,7 @@ resetjournals(){
   emessage "Clearing old qpid journal files.."
 
   foreman-maintain service stop
-  service postgresql start
-  rm -rf /var/lib/qpidd/.qpidd /var/lib/qpidd/*
+  rm -rf /var/lib/qpidd/.qpidd/qls
   systemctl start qpidd
   emessage "Sleeping for 60 seconds for qpid to start fully"
   sleep 60
@@ -254,7 +253,7 @@ then
   echo ""
   echo "ERROR: This script requires the 'foreman-maintain' command be installed. It"
   echo "is available in the [rhel-7-server-satellite-maintenance-6-rpms] repository via"
-  echo "the [rubygem-foreman_maintain] package." 
+  echo "the [rubygem-foreman_maintain] package."
   echo ""
   exit 3
 fi
