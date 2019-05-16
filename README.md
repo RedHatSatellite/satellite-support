@@ -19,7 +19,10 @@ Lists the top table sizes in disk space for both Candlepin and Foreman
 
 ## mongo-size-report
 
-Lists the top collection sizes in disk space for Mongo
+Lists the top collection sizes in disk space for Mongo. To use:
+```
+# ./mongo-size-report | tail -80
+```
 
 ## mongo-benchmark
 
