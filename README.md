@@ -23,6 +23,9 @@ Lists the top collection sizes in disk space for Mongo. To use:
 ```
 # ./mongo-size-report | tail -80
 ```
+## top-uuid-report
+
+List the top calls by uuid/fqdn
 
 ## mongo-benchmark
 
