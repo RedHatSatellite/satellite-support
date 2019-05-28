@@ -27,6 +27,11 @@ Lists the top collection sizes in disk space for Mongo. To use:
 
 List the top calls by uuid/fqdn
 
+## postgres-monitor
+
+Run this in a terminal to capture postgres active queries every 30 seconds.
+Output stored in postgres-monitor-output.log.
+
 ## mongo-benchmark
 
 Utility used for checking IO speed specific to MongoDB. See:
