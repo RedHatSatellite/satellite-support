@@ -25,7 +25,7 @@ Lists the top collection sizes in disk space for Mongo. To use:
 ```
 ## top-uuid-report
 
-List the top calls by uuid/fqdn
+List the top subscription-manager calls by uuid/fqdn. Blank fqdn indicates an unregistered host.
 
 ## postgres-monitor
 
