@@ -2,7 +2,7 @@
 
 Tuning settings for Satellite 6 with 32, 64 and 128G of RAM. If you have less than 32G RAM the default settings for Satellite 6 are appropriate.
 
-These tuning files can be applied to Satellite 6.4 and later.
+**NOTE: These tuning files can be applied to Satellite 6.4 and later.**
 
 Instructions for use:
 
