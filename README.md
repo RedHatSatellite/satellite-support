@@ -1,6 +1,10 @@
 # satellite-support
 Tools for use in supporting the operation of Satellite 6
 
+## tuning-profiles
+
+Some tuning template settings (custom-hiera) for Satellite 6 with 32, 64 and 128G of RAM. If you have less than 32G RAM the default settings for Satellite 6 are appropriate.
+
 ## satellite-reset
 
 **WARNING:** This utility should only be used as directed by Red Hat Support.
