@@ -54,7 +54,7 @@ if [ -f /etc/httpd/conf.d/passenger.conf ]; then
   echo "Custom-hiera  : apache::mod::passenger::passenger_max_pool_size"
   echo "                apache::mod::passenger::passenger_max_request_queue_size"
   echo "Current values:"
-  cat /etc/httpd/conf.d/05-foreman-ssl.conf | grep 'MaxPoolSize\|PassengerMaxRequestQueueSize'
+  cat /etc/httpd/conf.d/passenger.conf | grep 'MaxPoolSize\|PassengerMaxRequestQueueSize'
   echo ""
 else
   # Satellite 6.4+
