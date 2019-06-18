@@ -105,6 +105,14 @@ cat /var/lib/pgsql/data/postgresql.conf | \
         grep -v '^#'
 echo ""
 
+echo "************************* JAVA ******************************************"
+echo "Configuration : /etc/tomcat/tomcat.conf"
+echo "Custom-hiera  : candlepin::java_opts:"
+echo "Current values:"
+cat /etc/tomcat/tomcat.conf | grep 'JAVA_OPTS'
+check_return_value 'JAVA_OPTS'
+echo ""
+
 echo "************************* QPID ******************************************"
 echo "Configuration : /etc/qpid/qpidd.conf"
 echo "Custom-hiera  : qpid::mgmt_pub_interval"
