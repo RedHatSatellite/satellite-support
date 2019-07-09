@@ -19,22 +19,10 @@ postgresql::server::config_entries:
   autovacuum_vacuum_cost_limit: 2000
   log_min_duration_statement: 500
 
-# Additional considerations:
+# Manual configurations recommended:
 #
-# For really high # of concurrency and the need to go to 256 PassengerMaxPoolSize or above
-# you need to tune the kernel:
-#
-# 1) persist this configuration so it survives reboots:
-#
-# echo "kernel.sem= 250 256000 32 16384" > /etc/sysctl.d/01-satellite-tune.conf
-# echo "fs.aio-max-nr = 1000000" >> /etc/sysctl.d/01-satellite-tune.conf
-#
-# 2) load settings
-#
-# sysctl -p /etc/sysctl.d/01-satellite-tune.conf
-#
-# General performance and throughput can be increased at scale when you add an
-# additional dynflow_executor process This is not managed yet by 
+# 1) General performance and throughput can be increased at scale when you add an
+# additional dynflow_executor process This is not managed yet by
 # satellite-installer, see: https://bugzilla.redhat.com/show_bug.cgi?id=1692535
 #
 # Recommended settings:
@@ -42,10 +30,33 @@ postgresql::server::config_entries:
 # 65G-128G RAM or more: 3
 #
 # Edit: /etc/sysconfig/dynflowd
-# EXECUTORS_COUNT=3
-# 
+# EXECUTORS_COUNT=2
+#
 # Additionally memory consumption is better controlled when adding the below tuning
 # paramter to /etc/sysconfig/dynflowd
 # MALLOC_ARENA_MAX=2
-# 
+#
 # These changes require a restart of 'foreman-tasks' service.
+#
+# 2) Set max open files for httpd. The installer does not yet provide tuning for this
+#    see : https://bugzilla.redhat.com/show_bug.cgi?id=1728420
+#
+#  mkdir -p  /etc/systemd/system/httpd.service.d/
+#  echo "[Service]" >> /etc/systemd/system/httpd.service.d/limits.conf
+#  echo "LimitNOFILE=640000" >> /etc/systemd/system/httpd.service.d/limits.conf
+#  systemctl daemon-reload
+#  foreman-maintain service restart
+#
+# Additional considerations:
+#
+# For really high # of concurrency and the need to go to 256 PassengerMaxPoolSize or above
+# you need to tune the kernel:
+#
+# 3) persist this configuration so it survives reboots:
+#
+# echo "kernel.sem= 250 256000 32 16384" > /etc/sysctl.d/01-satellite-tune.conf
+# echo "fs.aio-max-nr = 1000000" >> /etc/sysctl.d/01-satellite-tune.conf
+#
+# 4) load settings
+#
+# sysctl -p /etc/sysctl.d/01-satellite-tune.conf
