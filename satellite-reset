@@ -58,8 +58,8 @@ cancelpulptasks(){
   #
   for myrpm in ${allrpms}
   do
-    rpm -q --quiet ${myrpm}  
-    if [ $? -eq 1 ]; then 
+    rpm -q --quiet ${myrpm}
+    if [ $? -eq 1 ]; then
       emessage "RPM ${myrpm} is missing! Installing..."
       yum -y install ${myrpm}
     else
@@ -128,10 +128,10 @@ resetjournals(){
 
   emessage "Recreating infrastructure queues.."
 
-  qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 add exchange topic event --durable
-  qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 add queue katello_event_queue --durable
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add exchange topic event --durable
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
   for key in compliance.created entitlement.created entitlement.deleted pool.created pool.deleted; do
-      qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 bind event katello_event_queue $key
+      qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue $key
   done
 
   emessage "Restarting services.."
@@ -174,7 +174,7 @@ recreategoferqueues(){
 
   for consumer in $(su - postgres -c "psql candlepin -c \"select uuid from cp_consumer;\"" | grep "^ " | grep -v uuid); do
     echo "Creating queue for: $consumer"
-    qpid-config --ssl-certificate=/etc/pki/katello/qpid_client_striped.crt -b amqps://localhost:5671 add queue pulp.agent.${consumer} --durable;
+    qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue pulp.agent.${consumer} --durable;
   done
 
   emessage "Restarting services.."
