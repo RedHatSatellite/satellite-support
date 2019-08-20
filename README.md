@@ -1,45 +1,61 @@
 # satellite-support
 Tools for use in supporting the operation of Satellite 6
 
-## tuning-profiles
+##### Tools
+- [check-perf-tuning](#check-perf-tuning)  
+- [mongo-benchmark](#mongo-benchmark)  
+- [mongo-size-report](#mongo-size-report)  
+- [postgres-monitor](#postgres-monitor)  
+- [postgres-size-report](#postgres-size-report)  
+- [satellite-reset](#satellite-reset)  
+- [storage-benchmark](#storage-benchmark)  
+- [top-uuid-report](#top-uuid-report)  
+- [tuning-profiles](#tuning-profiles)  
 
-Some tuning template settings (custom-hiera) for Satellite 6 with 32, 64 and 128G of RAM. If you have less than 32G RAM the default settings for Satellite 6 are appropriate.
+## [check-perf-tuning](check-perf-tuning)
 
-## satellite-reset
+Utility to check performance tuning parameters on your Satellite 6 server.
 
-**WARNING:** This utility should only be used as directed by Red Hat Support.
-There is a risk for data loss during these cleanup routines and should only be
-used when directly instructed to do so.
+## [mongo-benchmark](mongo-benchmark)
 
-## storage-benchmark
+Utility used for checking IO speed specific to MongoDB. See:
+[https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf](https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf)
 
-Utility used for checking the disk IO of your Satellite 6 server. See:
-
-[https://access.redhat.com/solutions/3397771](https://access.redhat.com/solutions/3397771)
-
-## postgres-size-report
-
-Lists the top table sizes in disk space for both Candlepin and Foreman
-
-## mongo-size-report
+## [mongo-size-report](mongo-size-report)
 
 Lists the top collection sizes in disk space for Mongo. To use:
 ```
 # ./mongo-size-report | tail -80
 ```
-## top-uuid-report
 
-List the top subscription-manager calls by uuid/fqdn. Blank fqdn indicates an unregistered host.
-
-## postgres-monitor
+## [postgres-monitor](postgres-monitor)
 
 Run this in a terminal to capture postgres active queries every 30 seconds.
 Output stored in postgres-monitor-output.log.
 
-## mongo-benchmark
+## [postgres-size-report](postgres-size-report)
 
-Utility used for checking IO speed specific to MongoDB. See:
-[https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf](https://www.mongodb.com/blog/post/checking-disk-performance-with-the-mongoperf)
+Lists the top table sizes in disk space for both Candlepin and Foreman
 
-## check-perf-tuning
-Utility to check performance tuning parameters on your Satellite 6 server.
+## [satellite-reset](satellite-reset)
+
+:warning:**WARNING:** This utility should only be used as directed by Red Hat Support.
+There is a risk for data loss during these cleanup routines and should only be
+used when directly instructed to do so.
+
+## [storage-benchmark](storage-benchmark)
+
+Utility used for checking the disk IO of your Satellite 6 server. See:
+
+[https://access.redhat.com/solutions/3397771](https://access.redhat.com/solutions/3397771)
+
+## [top-uuid-report](top-uuid-report)
+
+List the top subscription-manager calls by uuid/fqdn. Blank fqdn indicates an unregistered host.
+```
+./top-uuid-report /var/log/httpd/foreman-ssl_access_ssl.log
+```
+
+## [tuning profiles](tuning-profiles)
+
+Some tuning template settings (custom-hiera.yml) for Satellite 6 with [32](tuning-profiles/custom-hiera-medium-32G.yaml), [64](tuning-profiles/custom-hiera-large-64G.yaml), [128](tuning-profiles/custom-hiera-ex-large-128G.yaml) or [256GB](tuning-profiles/custom-hiera-2ex-large-256G.yaml) of RAM. If you have less than 32GB RAM the default settings for Satellite 6 are appropriate.
