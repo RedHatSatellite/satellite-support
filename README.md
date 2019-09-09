@@ -43,6 +43,10 @@ Lists the top table sizes in disk space for both Candlepin and Foreman
 There is a risk for data loss during these cleanup routines and should only be
 used when directly instructed to do so.
 
+## [satellite-remove](satellite-remove)
+
+:warning:**WARNING:** This utility will remove Satellite from the OS so it can be used for a different purpose without having to reinstall.
+
 ## [storage-benchmark](storage-benchmark)
 
 Utility used for checking the disk IO of your Satellite 6 server. See:
