@@ -56,16 +56,9 @@ postgresql::server::config_entries:
 #  systemctl daemon-reload
 #  foreman-maintain service restart
 #
-# Additional considerations:
-#
-# For really high # of concurrency and the need to go to 256 PassengerMaxPoolSize or above
-# you need to tune the kernel:
-#
-# 3) persist this configuration so it survives reboots:
+# 3) For conditions that require above a 256 PassengerMaxPoolSize you need to tune
+# the kernel:
 #
 # echo "kernel.sem= 250 256000 32 16384" > /etc/sysctl.d/01-satellite-tune.conf
 # echo "fs.aio-max-nr = 1000000" >> /etc/sysctl.d/01-satellite-tune.conf
-#
-# 4) load settings
-#
 # sysctl -p /etc/sysctl.d/01-satellite-tune.conf
