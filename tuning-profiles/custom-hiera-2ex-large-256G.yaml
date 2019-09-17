@@ -1,4 +1,4 @@
-# Tuning suitable for a Satellite with 12GG of RAM
+# Tuning suitable for a Satellite with 256G of RAM
 #
 # Instructions for use:
 # 1) Copy this file to /etc/foreman-installer/custom-hiera.yaml
