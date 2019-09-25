@@ -4,6 +4,10 @@
 # 1) Copy this file to /etc/foreman-installer/custom-hiera.yaml
 # 2) run 'satellite-installer' with no arguments to apply these settings
 
+# Note:
+# - passenger_max_pool_size value should not be greater than
+# 2 * Number of CPU cores on your satellite.
+
 apache::mod::passenger::passenger_max_pool_size: 60
 apache::mod::passenger::passenger_max_request_queue_size: 1000
 apache::mod::passenger::passenger_max_requests: 1000
