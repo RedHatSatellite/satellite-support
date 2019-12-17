@@ -20,8 +20,11 @@ echo "************************ APACHE & PASSENGER *****************************"
 echo "Configuration : /etc/httpd/conf.modules.d/prefork.conf"
 echo "Custom-hiera  : apache::mod::prefork::serverlimit"
 echo "                apache::mod::prefork::startservers"
+echo "                apache::mod::prefork::maxclients"
+echo "                apache::mod::prefork::maxrequestsperchild"
+
 echo "Current values:"
-cat /etc/httpd/conf.modules.d/prefork.conf | grep 'ServerLimit\|StartServers'
+cat /etc/httpd/conf.modules.d/prefork.conf | grep 'ServerLimit\|StartServers\|MaxClients\|MaxRequestsPerChild'
 echo ""
 
 echo "Configuration : /etc/httpd/conf.d/05-foreman.conf"
@@ -62,8 +65,9 @@ if [ -f /etc/httpd/conf.modules.d/passenger_extra.conf ]; then
   echo "Configuration : /etc/httpd/conf.modules.d/passenger_extra.conf"
   echo "Custom-hiera  : apache::mod::passenger::passenger_max_pool_size"
   echo "                apache::mod::passenger::passenger_max_request_queue_size"
+  echo "                apache::mod::passenger::passenger_max_requests"
   echo "Current values:"
-  cat /etc/httpd/conf.modules.d/passenger_extra.conf | grep 'MaxPoolSize\|PassengerMaxRequestQueueSize'
+  cat /etc/httpd/conf.modules.d/passenger_extra.conf | grep 'MaxPoolSize\|PassengerMaxRequestQueueSize\|PassengerMaxRequests'
   echo ""
 fi
 
@@ -102,7 +106,7 @@ echo "                   checkpoint_segments:"
 echo "                   checkpoint_completion_target:"
 echo "Current values:"
 cat /var/lib/pgsql/data/postgresql.conf | \
-    grep 'max_connections\|shared_buffers\|work_mem\|checkpoint_segments\|checkpoint_completion_target' | \
+    grep 'max_connections\|shared_buffers\|work_mem\|checkpoint_segments\|checkpoint_completion_target\|effective_cache_size\|autovacuum_vacuum_cost_limit\|log_min_duration_statement' | \
         grep -v '^#'
 echo ""
 
