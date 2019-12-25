@@ -11,6 +11,7 @@ Tools for use in supporting the operation of Satellite 6
 - [storage-benchmark](#storage-benchmark)  
 - [top-uuid-report](#top-uuid-report)  
 - [tuning-profiles](#tuning-profiles)  
+- [postgres-activity-report](#postgres-activity-report)
 
 ## [check-perf-tuning](check-perf-tuning)
 
@@ -36,6 +37,10 @@ Output stored in postgres-monitor-output.log.
 ## [postgres-size-report](postgres-size-report)
 
 Lists the top table sizes in disk space for both Candlepin and Foreman
+
+## [postgres-activity-report](postgres-activity-report)
+
+Lists the long running queries from PostgreSQL.
 
 ## [satellite-reset](satellite-reset)
 
