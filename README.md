@@ -33,6 +33,13 @@ Lists the top collection sizes in disk space for Mongo. To use:
 Run this in a terminal to capture postgres active queries every 30 seconds.
 Output stored in postgres-monitor-output.log.
 
+
+## [process-monitor.sh](process-monitor.sh)
+
+Run this in a terminal to capture sorted 'ps -aux' command every 10 seconds.
+Output stored in process-monitor-output.log.
+
+
 ## [postgres-size-report](postgres-size-report)
 
 Lists the top table sizes in disk space for both Candlepin and Foreman
