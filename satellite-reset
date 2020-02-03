@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SAT_MAJOR_VERSION=$(rpm -q satellite --queryformat "%{VERSION}" | cut -d "." -f 1)
+SAT_MINOR_VERSION=$(rpm -q satellite --queryformat "%{VERSION}" | cut -d "." -f 2)
+
 emessage(){
   #echo ""
   GREEN='\033[0;32m'
@@ -130,7 +133,16 @@ resetjournals(){
 
   qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add exchange topic event --durable
   qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
-  for key in compliance.created entitlement.created entitlement.deleted pool.created pool.deleted; do
+
+  if [[ $SAT_MAJOR_VERSION -eq 6 && $SAT_MINOR_VERSION -lt 5 ]]; then
+    emessage "Binding 5 events.."
+    bindings=(compliance.created entitlement.created entitlement.deleted pool.created pool.deleted)
+  else
+    emessage "Binding 6 events.."
+    bindings=(compliance.created entitlement.created entitlement.deleted pool.created pool.deleted system_purpose_compliance.created)
+  fi
+
+  for key in "${bindings[@]}"; do
       qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue $key
   done
 
