@@ -49,7 +49,7 @@ testlocation(){
   rm -f "$TESTDIRECTORY"/*
   echo ""
   echo "************* Running Random READ/WRITE test via fio:"
-  fio --name=randrw-test --rw=write --size="$FILEGB"G --directory=$TESTDIRECTORY --rwmixread=80
+  fio --name=randrw-test --rw=randrw --size="$FILEGB"G --directory=$TESTDIRECTORY --rwmixread=80
   echo ""
   echo "************* Removing test files."
   rm -f "$TESTDIRECTORY"/*
