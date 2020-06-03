@@ -18,9 +18,10 @@
 #
 # https://access.redhat.com/solutions/3397771
 #
-# Generally you wish to see on average 100MB/sec or higher in the tests below.
-#  - Local SSD based storage should values of 600MB/sec or higher
-#  - Spinning disks should see values in the range of 100-200MB/sec or higher
+# Generally you wish to see on average 100MB/sec or higher in the READ test.
+#  - Local SSD based storage should values of 600MB/sec or higher.
+#  - Spinning disks should see values in the range of 100-200MB/sec or higher.
+#  - Note that the random READ/WRITE results are expected to be much slower.
 #  - If you see values below this, please open a support ticket for assistance.
 #
 ###############################################################################
