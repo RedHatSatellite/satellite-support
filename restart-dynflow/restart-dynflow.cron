@@ -1,0 +1,8 @@
+SHELL=/bin/sh
+RAILS_ENV=production
+FOREMAN_HOME=/usr/share/foreman
+
+# Restart the Dynflow executor only if it is exceeding the given memory limit. Default is 1.5
+#MEMORY_LIMIT_GB=1.5
+
+0 */8 * * *    foreman    /usr/sbin/foreman-rake foreman_tasks:restart_dynflow >>/var/log/foreman/cron.log 2>&1
