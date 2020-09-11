@@ -12,6 +12,7 @@ Tools for use in supporting the operation of Satellite 6
 - [top-uuid-report](#top-uuid-report)  
 - [tuning-profiles](#tuning-profiles)  
 - [postgres-activity-report](#postgres-activity-report)
+- [production-log-load-stats](#production-log-load-stats)
 
 ## [check-perf-tuning](check-perf-tuning)
 
@@ -67,6 +68,10 @@ List the top subscription-manager calls by uuid/fqdn. Blank fqdn indicates an un
 ```
 ./top-uuid-report /var/log/httpd/foreman-ssl_access_ssl.log
 ```
+
+## [production-log-load-stats](production-log-load-stats)
+
+Analyze `production.log` for load+performance statistics about types of requests to Satellite. See [https://github.com/pmoravec/rails-load-stats](https://github.com/pmoravec/rails-load-stats) for more description. **WARNING:** the script can consume excessive resources (time, memory, CPU) on large log files. Therefore it is recommended to run it outside production system on a copied logfile.
 
 ## [tuning profiles](tuning-profiles)
 
