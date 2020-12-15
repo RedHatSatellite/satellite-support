@@ -2,8 +2,8 @@
 Tools for use in supporting the operation of Satellite 6
 
 ##### Tools
-- [check-perf-tuning](#check-perf-tuning)  
-- [check-cdn-ips] (#check-cdn-ips)
+- [check-perf-tuning](#check-perf-tuning) 
+- [check-cdn-ips](#check-cdn-ips)
 - [mongo-benchmark](#mongo-benchmark)  
 - [mongo-size-report](#mongo-size-report)  
 - [postgres-monitor](#postgres-monitor)  
