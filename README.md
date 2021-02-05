@@ -69,6 +69,27 @@ List the top subscription-manager calls by uuid/fqdn. Blank fqdn indicates an un
 ./top-uuid-report /var/log/httpd/foreman-ssl_access_ssl.log
 ```
 
+## [capsule_sync_report.rake](capsule_sync_report.rake)
+
+Read only rake utility to generate a report of Capsule sync timings over a passed in set of days.
+
+To deploy, download the capsule_sync_report.rake to your Satellite and copy to the
+
+```
+cd `rpm -ql tfm-rubygem-katello | head -n 1`/lib/katello/tasks
+cp /root/capsule_sync_report.rake .
+```
+
+To run, specify the # of days in an environment variable:
+
+```
+# DAYS=30 foreman-rake katello:generate_content_view_capsule_sync_metrics
+Task started. This may take a while depending on the amount of tasks.
+Task completed. Output stored in /tmp/content_view_sync_metrics.txt
+```
+
+you can then view the report in /tmp/content_view_sync_metrics.txt
+
 ## [production-log-load-stats](production-log-load-stats)
 
 Analyze `production.log` for load+performance statistics about types of requests to Satellite. See [https://github.com/pmoravec/rails-load-stats](https://github.com/pmoravec/rails-load-stats) for more description. **WARNING:** the script can consume excessive resources (time, memory, CPU) on large log files. Therefore it is recommended to run it outside production system on a copied logfile.
