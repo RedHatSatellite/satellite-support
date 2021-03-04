@@ -100,17 +100,17 @@ resethornetq(){
 
   emessage "Recreating queues."
   # Forcefully delete the Qpid queue
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 del queue katello_event_queue --force
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 del queue katello_event_queue --force
 
   # Re-create the Qpid queue
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
 
   # Re-create the exchanges
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue compliance.created
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue entitlement.created
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue entitlement.deleted
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.created
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.deleted
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue compliance.created
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue entitlement.created
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue entitlement.deleted
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.created
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue pool.deleted
 
   emessage "Starting services."
   foreman-maintain service start 2>&1  > /dev/null
@@ -131,8 +131,8 @@ resetjournals(){
 
   emessage "Recreating infrastructure queues.."
 
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add exchange topic event --durable
-  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 add exchange topic event --durable
+  qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 add queue katello_event_queue --durable
 
   if [[ $SAT_MAJOR_VERSION -eq 6 && $SAT_MINOR_VERSION -lt 5 ]]; then
     emessage "Binding 5 events.."
@@ -143,7 +143,7 @@ resetjournals(){
   fi
 
   for key in "${bindings[@]}"; do
-      qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue $key
+      qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 bind event katello_event_queue $key
   done
 
   emessage "Restarting services.."
@@ -186,7 +186,7 @@ recreategoferqueues(){
 
   for consumer in $(su - postgres -c "psql candlepin -c \"select uuid from cp_consumer;\"" | grep "^ " | grep -v uuid); do
     echo "Creating queue for: $consumer"
-    qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname`-qpid-broker.key -b amqps://localhost:5671 add queue pulp.agent.${consumer} --durable;
+    qpid-config --ssl-certificate /etc/pki/katello/certs/`hostname -f`-qpid-broker.crt --ssl-key /etc/pki/katello/private/`hostname -f`-qpid-broker.key -b amqps://localhost:5671 add queue pulp.agent.${consumer} --durable;
   done
 
   emessage "Restarting services.."
