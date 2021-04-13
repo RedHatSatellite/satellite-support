@@ -4,7 +4,7 @@ Tuning settings for Satellite 6 with 32, 64, 128G and 256G of RAM. If you have l
 
 NOTE:
 - These tuning files can be applied to Satellite 6.4, 6.5 and 6.6.
-- From Satellite 6.7, these tuning profiles are integrated with [satellite-installer](https://access.redhat.com/documentation/en-us/red_hat_satellite/6.7/html/installing_satellite_server_from_a_connected_network/performing_additional_configuration_on_satellite_server#tuning-satellite-server-with-predefined-profiles)
+- From Satellite 6.7, these tuning profiles are integrated with [satellite-installer](https://access.redhat.com/documentation/en-us/red_hat_satellite/6.7/html/installing_satellite_server_from_a_connected_network/performing-additional-configuration#tuning-satellite-server-with-predefined-profiles_satellite)
 
 
 Instructions for use:
