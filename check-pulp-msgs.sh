@@ -13,7 +13,7 @@
 #                       https://bugzilla.redhat.com/show_bug.cgi?id=1945534
 # 
 
-SRV_FQDN=$(hostname)
+SRV_FQDN=$(hostname -f)
 CERT="/etc/pki/pulp/qpid/client.crt"
 LOG="/var/log/pulp_queue.log"
 
