@@ -15,6 +15,11 @@ apache::mod::prefork::maxrequestsperchild: 4000
 qpid::open_file_limit: 65536
 qpid::router::open_file_limit: 150100
 
+puppet::server::puppetserver::jvm_min_heap_size: 2G
+puppet::server::puppetserver::jvm_max_heap_size: 8G
+puppet::server::puppetserver::server_max_active_instances: 32
+puppet::server::puppetserver::server_max_requests_per_instance: 100000
+
 candlepin::java_opts: "-Xms1024m -Xmx8192m"
 
 postgresql::server::config_entries:
