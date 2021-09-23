@@ -21,6 +21,12 @@ TABLEQUERY=$(cat <<-END
 END
 )
 
+if [ -f /var/opt/rh/rh-postgresql12/lib/pgsql/data/postgresql.conf ]; then
+  PGSQL_DIR="/var/opt/rh/rh-postgresql12/lib/pgsql"
+else
+  PGSQL_DIR="/var/lib/pgsql"
+fi
+
 # echo $TABLEQUERY
 cd ~postgres
 
@@ -49,8 +55,8 @@ echo ""
 echo "*************** FileSystem Usage ***************"
 echo ""
 
-echo "du -hs /var/lib/pgsql/*"
-du -hs /var/lib/pgsql/*
+echo "du -hs $PGSQL_DIR/*"
+du -hs $PGSQL_DIR/*
 echo
-echo "du -hs /var/lib/pgsql/data/*"
-du -hs /var/lib/pgsql/data/*
+echo "du -hs $PGSQL_DIR/data/*"
+du -hs $PGSQL_DIR/data/*
