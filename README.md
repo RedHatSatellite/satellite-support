@@ -95,10 +95,9 @@ you can then view the report in /tmp/content_view_sync_metrics.txt
 
 Analyze `production.log` for load+performance statistics about types of requests to Satellite. See [https://github.com/pmoravec/rails-load-stats](https://github.com/pmoravec/rails-load-stats) for more description. **WARNING:** the script can consume excessive resources (time, memory, CPU) on large log files. Therefore it is recommended to run it outside production system on a copied logfile.
 
-## [tuning profiles](tuning-profiles)
+## tuning profiles
 
-Some tuning template settings (custom-hiera.yml) for Satellite 6 with [32](tuning-profiles/custom-hiera-medium-32G.yaml), [64](tuning-profiles/custom-hiera-large-64G.yaml), [128](tuning-profiles/custom-hiera-ex-large-128G.yaml) or [256GB](tuning-profiles/custom-hiera-2ex-large-256G.yaml) of RAM. If you have less than 32GB RAM the default settings for Satellite 6 are appropriate.
-
+Previously this repository contained tuning templates for custom-hiera.yml. In Satellite 6.7 and above, the --tuning option is provided by the satellite-installer, with custom-hiera.yml still available as an additional layer for fine tuning or customization. Additional information on the --tuning option is available in the [Satellite documentation](https://access.redhat.com/documentation/en-us/red_hat_satellite/6.9/html-single/installing_satellite_server_from_a_connected_network/index#tuning-with-predefined-profiles).
 
 ## [check-pulp-msg](check-pulp-msg)
 
