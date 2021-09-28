@@ -37,6 +37,12 @@ echo $TABLEQUERY | sudo -u postgres psql -d foreman
 
 
 echo ""
+echo "************** Pulpcore Tablesizes *************"
+echo ""
+echo $TABLEQUERY | sudo -u postgres psql -d pulpcore
+
+
+echo ""
 echo "*************** FileSystem Usage ***************"
 echo ""
 
