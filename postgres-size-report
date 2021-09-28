@@ -36,10 +36,13 @@ echo ""
 echo $TABLEQUERY | sudo -u postgres psql -d foreman
 
 
-echo ""
-echo "************** Pulpcore Tablesizes *************"
-echo ""
-echo $TABLEQUERY | sudo -u postgres psql -d pulpcore
+if PULPCORE_TABLESIZES=$(echo $TABLEQUERY | sudo -u postgres psql -d pulpcore 2>/dev/null)
+then
+  echo ""
+  echo "************** Pulpcore Tablesizes *************"
+  echo ""
+  echo "$PULPCORE_TABLESIZES"
+fi
 
 
 echo ""
