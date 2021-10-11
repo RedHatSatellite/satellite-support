@@ -104,11 +104,10 @@ if [ -f /var/opt/rh/rh-postgresql12/lib/pgsql/data/postgresql.conf ]; then
   echo "                   max_connections:"
   echo "                   shared_buffers:"
   echo "                   work_mem:"
-  echo "                   checkpoint_segments:"
   echo "                   checkpoint_completion_target:"
   echo "Current values:"
   cat /var/opt/rh/rh-postgresql12/lib/pgsql/data/postgresql.conf | \
-      grep 'max_connections\|shared_buffers\|work_mem\|checkpoint_segments\|checkpoint_completion_target\|effective_cache_size\|autovacuum_vacuum_cost_limit\|log_min_duration_statement' | \
+      grep 'max_connections\|shared_buffers\|work_mem\|checkpoint_completion_target\|effective_cache_size\|autovacuum_vacuum_cost_limit\|log_min_duration_statement' | \
           grep -v '^#'
   echo ""
 else
