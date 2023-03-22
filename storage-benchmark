@@ -111,7 +111,7 @@ then
     	exit 1
     else
     	echo "** Installing fio **"
-    	yum install -y fio
+    	foreman-maintain packages install fio
     fi
 fi
 
