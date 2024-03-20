@@ -118,7 +118,7 @@ then
     	# yum install -y fio
       #
       # alternative:
-      foreman-maintain packages install fio
+      foreman-maintain packages install fio -y
     fi
 fi
 
