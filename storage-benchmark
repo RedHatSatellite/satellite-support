@@ -76,7 +76,10 @@ fi
 
 RAMGB=`grep MemTotal /proc/meminfo  | awk '{s+=$2} END {print s / 1000000}'`
 # Convert to integer
-RAMGB=`printf "%.0f\n" "$RAMGB"`
+# The current way gives an error: not a numbe
+# RAMGB=`printf "%.0f\n" "$RAMGB"`
+# alternative tested on RHEL 8:
+RAMGB=`echo $RAMGB|awk -F . '{print $1}'`
 FILEGB="$(($RAMGB * 2))"
 TESTDIRECTORY=$TESTPATH/storage-benchmark
 
@@ -111,7 +114,7 @@ then
     	exit 1
     else
     	echo "** Installing fio **"
-    	yum install -y fio
+        yum install -y fio
     fi
 fi
 
