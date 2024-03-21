@@ -114,7 +114,7 @@ then
     	exit 1
     else
     	echo "** Installing fio **"
-       yum install -y fio
+        yum install -y fio
     fi
 fi
 
