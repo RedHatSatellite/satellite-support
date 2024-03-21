@@ -114,11 +114,7 @@ then
     	exit 1
     else
     	echo "** Installing fio **"
-      # this fails if foreman-maintain packages lock if applied
-    	# yum install -y fio
-      #
-      # alternative:
-      foreman-maintain packages install fio -y
+  	  yum install -y fio
     fi
 fi
 
