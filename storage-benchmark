@@ -38,22 +38,13 @@ testlocation(){
   echo ""
   echo "************* Running READ test via fio:"
   echo ""
-  fio --name=read-test --rw=read --size="$FILEGB"G --directory=$TESTDIRECTORY
-  echo ""
-  echo "************* Removing test files."
-  rm -f "$TESTDIRECTORY"/*
+  fio --name=read-test --rw=read --size="$FILEGB"G --directory=$TESTDIRECTORY --unlink=1
   echo ""
   echo "************* Running WRITE test via fio:"
-  fio --name=write-test --rw=write --size="$FILEGB"G --directory=$TESTDIRECTORY
-  echo ""
-  echo "************* Removing test files."
-  rm -f "$TESTDIRECTORY"/*
+  fio --name=write-test --rw=write --size="$FILEGB"G --directory=$TESTDIRECTORY --unlink=1
   echo ""
   echo "************* Running Random READ/WRITE test via fio:"
-  fio --name=randrw-test --rw=randrw --size="$FILEGB"G --directory=$TESTDIRECTORY --rwmixread=80
-  echo ""
-  echo "************* Removing test files."
-  rm -f "$TESTDIRECTORY"/*
+  fio --name=randrw-test --rw=randrw --size="$FILEGB"G --directory=$TESTDIRECTORY --rwmixread=80 --unlink=1
   echo ""
   echo "Test complete! There is still a directory located : $TESTDIRECTORY that you"
   echo "will need to remove to run this test again."
