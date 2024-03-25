@@ -17,15 +17,27 @@ check_return_value () {
 }
 
 echo "************************ APACHE & PASSENGER *****************************"
-echo "Configuration : /etc/httpd/conf.modules.d/prefork.conf"
-echo "Custom-hiera  : apache::mod::prefork::serverlimit"
-echo "                apache::mod::prefork::startservers"
-echo "                apache::mod::prefork::maxclients"
-echo "                apache::mod::prefork::maxrequestsperchild"
-
-echo "Current values:"
-cat /etc/httpd/conf.modules.d/prefork.conf | grep 'ServerLimit\|StartServers\|MaxClients\|MaxRequestsPerChild'
-echo ""
+if [ -f /etc/httpd/conf.modules.d/prefork.conf ]; then
+  # Satellite 6.11 and lesser
+  echo "Configuration : /etc/httpd/conf.modules.d/prefork.conf"
+  echo "Custom-hiera  : apache::mod::prefork::serverlimit"
+  echo "                apache::mod::prefork::startservers"
+  echo "                apache::mod::prefork::maxclients"
+  echo "                apache::mod::prefork::maxrequestsperchild"
+  echo "Current values:"
+  cat /etc/httpd/conf.modules.d/prefork.conf | grep 'ServerLimit\|StartServers\|MaxClients\|MaxRequestsPerChild'
+  echo ""
+fi
+if [ -f /etc/httpd/conf.modules.d/event.conf ]; then
+  # Satellite 6.12+  
+  echo "Configuration : /etc/httpd/conf.modules.d/event.conf"
+  echo "Custom-hiera  : apache::mod::event::serverlimit"
+  echo "                apache::mod::event::startservers"
+  echo "                apache::mod::event::maxclients"
+  echo "Current values:"
+  cat /etc/httpd/conf.modules.d/event.conf | grep 'ServerLimit\|StartServers\|MaxClients'
+  echo ""
+fi
 
 echo "Configuration : /etc/httpd/conf.d/05-foreman.conf"
 echo "Custom-hiera  : foreman::keepalive"
