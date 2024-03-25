@@ -109,7 +109,7 @@ else
 fi
 
 if [ -f /var/opt/rh/rh-postgresql12/lib/pgsql/data/postgresql.conf ]; then
-  # Satellite 6.8+
+  # Satellite 6.8+ until 6.12 on RHEL 7
   echo "************************* POSTGRES **************************************"
   echo "Configuration : /var/opt/rh/rh-postgresql12/lib/pgsql/data/postgresql.conf"
   echo "Custom-hiera  : postgresql::server::config_entries:"
@@ -123,7 +123,7 @@ if [ -f /var/opt/rh/rh-postgresql12/lib/pgsql/data/postgresql.conf ]; then
           grep -v '^#'
   echo ""
 else
-  # Satellite 6.7 and earlier
+  # Satellite 6.7 and earlier on RHEL 7 and Satellite 6.12+ on RHEL 8
   echo "************************* POSTGRES **************************************"
   echo "Configuration : /var/lib/pgsql/data/postgresql.conf"
   echo "Custom-hiera  : postgresql::server::config_entries:"
