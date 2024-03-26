@@ -65,9 +65,7 @@ then
   exit 1
 fi
 
-RAMGB=`grep MemTotal /proc/meminfo  | awk '{s+=$2} END {print s / 1000000}'`
-# Convert to integer
-RAMGB=`printf "%.0f\n" "$RAMGB"`
+RAMGB=$(awk '/^MemTotal:/ {printf "%d\n", $2 / 1024 / 1024}' /proc/meminfo)
 FILEGB="$(($RAMGB * 2))"
 TESTDIRECTORY=$TESTPATH/storage-benchmark
 
