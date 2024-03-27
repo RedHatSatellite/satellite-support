@@ -89,18 +89,21 @@ then
 fi
 
 
-if [ ! -x /usr/bin/fio ]
-then
-  echo "This benchmark requires the 'fio' command be installed"
-  echo "Would you like to install it?"
-  read INSTALLFIO
-  if [[ ! $INSTALLFIO =~ ^[Yy]$ ]]
-    then
-    	echo "** cancelled **"
-    	exit 1
+if [[ ! -x /usr/bin/fio ]]; then
+    echo "This benchmark requires the 'fio' command be installed"
+    echo "Would you like to install it? (Y/n)"
+    read INSTALLFIO
+    if [[ ! $INSTALLFIO =~ ^[Yy]$ ]]; then
+        echo "** cancelled **"
+        exit 1
     else
-    	echo "** Installing fio **"
-    	foreman-maintain packages install -y fio
+        echo "** Installing fio **"
+        if [[ ! -x "$(command -v foreman-maintain)" ]]; then
+            echo "foreman-maintain not installed. Installing 'fio' using yum."
+            yum install -y fio
+        else
+            foreman-maintain packages install -y fio
+        fi
     fi
 fi
 
