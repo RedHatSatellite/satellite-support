@@ -30,6 +30,9 @@
 # Exit on any error
 set -e
 
+# Ensure memory math works as expected - rif. bug #80
+export LANG=C
+
 testlocation(){
   mkdir -p $TESTDIRECTORY
   echo ""
