@@ -3,6 +3,7 @@ Tools for use in supporting the operation of Satellite 6
 
 ##### Tools
 - [check-perf-tuning](#check-perf-tuning)  
+- [check-satellite-ip](#check-satellite-ip)
 - [mongo-benchmark](#mongo-benchmark)  
 - [mongo-size-report](#mongo-size-report)  
 - [postgres-monitor](#postgres-monitor)  
@@ -18,6 +19,11 @@ Tools for use in supporting the operation of Satellite 6
 ## [check-perf-tuning](check-perf-tuning)
 
 Utility to check performance tuning parameters on your Satellite 6 server.
+
+## [check-satellite-ip](check_satellite_ip.sh)
+
+Check the list of IP addresses given in https://access.redhat.com/articles/1525183
+to determine if firewall ports are open for CDN IP addresses.
 
 ## [mongo-benchmark](mongo-benchmark)
 
