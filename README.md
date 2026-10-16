@@ -9,6 +9,7 @@ Tools for use in supporting the operation of Satellite 6
 - [postgres-size-report](#postgres-size-report)  
 - [satellite-reset](#satellite-reset)  
 - [storage-benchmark](#storage-benchmark)  
+- [satellite-storage-benchmark.sh](#satellite-storage-benchmarksh)  
 - [top-uuid-report](#top-uuid-report)  
 - [tuning-profiles](#tuning-profiles)  
 - [postgres-activity-report](#postgres-activity-report)
@@ -62,6 +63,82 @@ used when directly instructed to do so.
 Utility used for checking the disk IO of your Satellite 6 server. See:
 
 [https://access.redhat.com/solutions/3397771](https://access.redhat.com/solutions/3397771)
+
+> **Deprecated — superseded by [satellite-storage-benchmark.sh](#satellite-storage-benchmarksh).** This original script runs buffered sequential-only `fio` tests (no `O_DIRECT`, no `fsync`), which measure the page cache more than the backend disk and don't reflect the PostgreSQL/Pulp I/O profiles. Prefer the successor for new work.
+
+## [satellite-storage-benchmark.sh](satellite-storage-benchmark.sh)
+
+Successor to `storage-benchmark` that measures the **backend** disk under the two
+I/O profiles that actually drive Satellite: **PostgreSQL** (small 8k random I/O
+plus commit/`fdatasync` latency) and **Pulp** (large 1M sequential transfer). It
+uses `fio` with `O_DIRECT` (to bypass the page cache and measure the real device)
+and the synchronous **`psync`** engine at `iodepth=1` — mirroring how PostgreSQL
+backends and pulpcore workers actually issue I/O (blocking `pread`/`pwrite` +
+`fdatasync`), with concurrency modelled by the number of processes (`numjobs`). It
+reports IOPS, latency percentiles and bandwidth for the real device, and finishes
+in minutes (no 2×RAM file).
+
+### Usage
+
+```
+# ./satellite-storage-benchmark.sh          # tests both /var/lib/pgsql and /var/lib/pulp
+# ./satellite-storage-benchmark.sh pgsql     # just the PostgreSQL data directory
+# ./satellite-storage-benchmark.sh pulp      # just the Pulp data directory
+```
+
+With no argument it benchmarks both Satellite data directories (`/var/lib/pgsql`
+and `/var/lib/pulp`) — hardcoded, not inferred from a path — running each one's
+role-appropriate tests. For a containerized (foremanctl) Satellite, run it **on
+the container host** (not inside a container); those host directories are the
+volumes that back the PostgreSQL and pulpcore containers, which is the storage
+whose performance matters.
+
+### Output
+
+Prints a **PASS/WARN/FAIL verdict per profile** and writes a machine-readable JSON
+report (`/tmp/satellite-storage-benchmark-<timestamp>.json`) for comparing runs.
+The PostgreSQL commit (`fdatasync`) p99 latency is the single most important
+number — a FAIL there means the database will stall under load.
+
+### Tunables
+
+Command-line options (also shown by `--help`):
+
+- `--filegb N` (default `10`) — test file size, GiB.
+- `--runtime N` (default `180`) — seconds per profile (`3000` with `--sustained`).
+- `--pgsql-jobs N` (default `8`) — concurrent PostgreSQL backends modelled.
+- `--pulp-jobs N` (default `min(8, nproc)`) — parallel Pulp workers modelled (pulpcore's default worker count).
+- `--sustained` — raise runtime to 3000s/profile so cloud burst credits deplete (a full run then takes hours; override with `--runtime` if you need less).
+
+### Virtualized / cloud guests
+
+Inside a VM, throughput and IOPS can be served from the hypervisor's page cache
+and cannot be trusted from inside the guest — there is no guest-side signal that
+distinguishes "fast media" from "warm host cache". The script detects a VM host
+(`systemd-detect-virt --vm`) and then shows bandwidth/IOPS/random-latency as
+**`[INFO]` (measured but not graded)**, grading **only `fdatasync`** — the one
+metric that survives caching, because durability forces a real flush. It cannot
+detect a hypervisor configured to ignore flushes (`cache=unsafe`), so a passing
+`fdatasync` is not an absolute durability guarantee. To grade throughput/IOPS
+from a guest, ask your virtualization/cloud admin whether this disk's virtual
+storage can be set to bypass host-side caching (often called a "direct" or
+"no-cache" mode — naming and location vary by platform), then re-run.
+
+Some cloud/virtual block storage uses a **burst-credit** model: a short test rides
+the burst and over-reports, then performance falls to a lower provisioned baseline
+once credits are spent. Pass **`--sustained`** to run long enough to exhaust the
+credits and measure that baseline. How long that takes depends on the volume (and
+large or high-tier volumes often don't burst at all), so treat your provider's own
+volume/burst metrics as the authoritative view — the guest can't see them.
+`--sustained` does *not* defeat hypervisor page cache; raising `--filegb` above
+host RAM only *reduces* (never eliminates) cache inflation, and the guest cannot
+see host RAM, so it is a best-effort lever, not a fix.
+
+On HDD-backed volumes, multiple concurrent sequential streams make the heads
+thrash, so the Pulp profiles' `--pulp-jobs` parallelism (which models real
+pulpcore workers) reports lower sequential throughput than a single stream would —
+that low number is workload-representative, not an artifact. To measure the drive's
+peak single-stream sequential capability instead, use `--pulp-jobs 1`.
 
 ## [top-uuid-report](top-uuid-report)
 
